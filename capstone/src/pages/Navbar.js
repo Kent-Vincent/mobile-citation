@@ -18,15 +18,15 @@ import MoreIcon from '@mui/icons-material/MoreVert';
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
-})(({theme}) => ({
-  zIndex: theme.zIndex.drawer + 1, backgroundColor: '#00425A', 
+})(({ theme }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  backgroundColor: '#00425A',
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: 'inherit',
   '& .MuiInputBase-input': {
     padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create('width'),
     width: '100%',

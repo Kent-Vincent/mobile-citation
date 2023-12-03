@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { getAuth, onAuthStateChanged ,signOut } from 'firebase/auth';
 import { useRouter } from 'next/router';
 import app from '../../firebase';
+import Dashboard from './Dashboard';
+import Navbar from './Navbar';
 
 const Home = () => {
   const router = useRouter();
@@ -30,6 +32,8 @@ const Home = () => {
 
   return (
     <div>
+      <Dashboard />
+      <Navbar />
       <h1>Home Page</h1>
       <button onClick={handleLogout}>Logout</button>
     </div>

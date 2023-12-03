@@ -17,9 +17,9 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import HomeIcon from '@mui/icons-material/Home';
-import { Link } from 'react-router-dom';
 import GroupIcon from '@mui/icons-material/Group';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import Link from 'next/link';
 
 const drawerWidth = 240;
 
@@ -43,7 +43,6 @@ const closedMixin = (theme) => ({
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
 });
-
 
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -71,7 +70,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-export default function Dashboard () {
+export default function Dashboard() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
 
@@ -86,34 +85,32 @@ export default function Dashboard () {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      
+
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
-        </DrawerHeader> 
+        </DrawerHeader>
         <List>
-  {[
-    { text: 'Home', icon: <HomeIcon />, route: '/home' },
-    { text: 'Accounts', icon: <GroupIcon />, route: '/accounts' },
-    { text: 'Transaction', icon: <ReceiptIcon />, route: '/transaction' },
-  ].map((item, index) => (
-    <ListItem key={item.text} disablePadding>
-      <ListItemButton component={Link} to={item.route}>
-        <ListItemIcon>
-          {item.icon}
-        </ListItemIcon>
-        <ListItemText primary={item.text} />
-      </ListItemButton>
-    </ListItem>
-  ))}
-</List>
+          {[
+            { text: 'Home', icon: <HomeIcon />, route: '/home' },
+            { text: 'Accounts', icon: <GroupIcon />, route: '/accounts' },
+            { text: 'Transaction', icon: <ReceiptIcon />, route: '/transaction' },
+          ].map((item, index) => (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton component={Link} href={item.route}>
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
         <Divider />
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
-        
+        {/* Your main content goes here */}
       </Box>
     </Box>
   );
