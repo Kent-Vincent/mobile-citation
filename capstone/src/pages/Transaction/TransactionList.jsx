@@ -96,7 +96,7 @@ export default function TransactionList() {
                   <TableCell
                     key={column.id}
                     align={column.align}
-                    style={{ minWidth: column.minWidth, fontWeight:'bolder'}}
+                    style={{ minWidth: column.minWidth, fontWeight:'bold'}}
                   >
                     {column.label}
                   </TableCell>
