@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -15,56 +15,57 @@ import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 
 const columns = [
-  { id: 'name', label: 'Name' },
-  { id: 'email', label: 'Email' },
-  { id: 'password', label: 'Password' },
-];
+    { id: 'name', label: 'Name' },
+    { id: 'email', label: 'Email' },
+    { id: 'password', label: 'Password' },
+  ];
 
-function createData(name, email,password) {
-  return { name, email,password };
-}
+function createData(name, email, password) {
+    return { name, email, password };
+  }
 
-export default function TransactionList() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [items, setItems] = React.useState([
-    createData('Kent Sarsalejo', 'admin@gmail.com'),
-  ]);
+  export default function TransactionList() {
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [items, setItems] = useState([
+      createData('Kent Sarsalejo', 'admin@gmail.com'),
+    ]);
+  
+    const [openDialog, setOpenDialog] = useState(false);
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+  
+    const handleClickOpen = () => {
+      setOpenDialog(true);
+    };
+  
+    const handleClose = () => {
+      setOpenDialog(false);
+    };
+  
+    const handleChangePage = (event, newPage) => {
+      setPage(newPage);
+    };
+  
+    const handleChangeRowsPerPage = (event) => {
+      setRowsPerPage(+event.target.value);
+      setPage(0);
+    };
+  
+    const addItem = () => {
+      setItems([...items, createData(name, email, password)]);
+      setName('');
+      setEmail('');
+      setPassword('');
+      handleClose(); // Close the dialog after adding an item
+    };
 
-  const [openDialog, setOpenDialog] = React.useState(false);
-  const [name, setName] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+    return (
+        <>
+          <Paper sx={{ width: '80%', overflow: 'hidden', marginLeft: '150px' }}>
 
-  const handleClickOpen = () => {
-    setOpenDialog(true);
-  };
-
-  const handleClose = () => {
-    setOpenDialog(false);
-  };
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
-
-  const addItem = () => {
-    setItems([...items, createData(name, email,password)]);
-    setName('');
-    setEmail('');
-    setPassword('');
-    handleClose(); // Close the dialog after adding an item
-  };
-
-  return (
-    <>
-      <Paper sx={{ width: '80%', overflow: 'hidden', marginLeft: '150px' }}>
-        <TableContainer sx={{ maxHeight: 'calc(100vh - 100px)' }}>
+          <TableContainer sx={{ maxHeight: 'calc(100vh - 100px)' }}>
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
@@ -116,14 +117,15 @@ export default function TransactionList() {
         open={openDialog}
         onClose={handleClose}
         PaperProps={{
-        sx: {
-        borderRadius: '15px',
-        backgroundColor: '#00425A',
-        color: ''
-        },
-            }}
-        >
-        <DialogTitle>Add New Item</DialogTitle>
+          sx: {
+            borderRadius: '15px',
+            backgroundColor: '#00425A',
+            color: '',
+          },
+        }}
+      >
+
+<DialogTitle>Add New Item</DialogTitle>
         <DialogContent >
           <TextField
             autoFocus
@@ -177,3 +179,5 @@ export default function TransactionList() {
     </>
   );
 }
+
+  
