@@ -58,7 +58,7 @@ function createData(name, email, password) {
       setName('');
       setEmail('');
       setPassword('');
-      handleClose(); // Close the dialog after adding an item
+      handleClose();
     };
 
     return (
@@ -119,13 +119,13 @@ function createData(name, email, password) {
         PaperProps={{
           sx: {
             borderRadius: '15px',
-            backgroundColor: '#00425A',
+            backgroundColor: '#FFF',
             color: '',
           },
         }}
       >
 
-<DialogTitle>Add New Item</DialogTitle>
+<DialogTitle>Add New Account</DialogTitle>
         <DialogContent >
           <TextField
             autoFocus
