@@ -119,7 +119,7 @@ function createData(name, email, password) {
         PaperProps={{
           sx: {
             borderRadius: '15px',
-            backgroundColor: '#00425A',
+            backgroundColor: '#FFF',
             color: '',
           },
         }}
