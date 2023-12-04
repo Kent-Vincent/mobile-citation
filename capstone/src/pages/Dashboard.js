@@ -2,24 +2,20 @@ import * as React from 'react';
 import { styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
-import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import CssBaseline from '@mui/material/CssBaseline';
-import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import HomeIcon from '@mui/icons-material/Home';
 import GroupIcon from '@mui/icons-material/Group';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 const drawerWidth = 240;
 
@@ -73,6 +69,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 export default function Dashboard() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
+  const router = useRouter();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -80,6 +77,10 @@ export default function Dashboard() {
 
   const handleDrawerClose = () => {
     setOpen(false);
+  };
+
+  const handleNavigation = (route) => {
+    router.push(route);
   };
 
   return (
@@ -94,12 +95,11 @@ export default function Dashboard() {
         </DrawerHeader>
         <List>
           {[
-            { text: 'Home', icon: <HomeIcon />, route: '/home' },
             { text: 'Accounts', icon: <GroupIcon />, route: '/accounts' },
-            { text: 'Transaction', icon: <ReceiptIcon />, route: '/transaction' },
+            { text: 'Transaction', icon: <ReceiptIcon />, route: '/Transaction/Transaction' },
           ].map((item, index) => (
             <ListItem key={item.text} disablePadding>
-              <ListItemButton component={Link} href={item.route}>
+              <ListItemButton onClick={() => handleNavigation(item.route)}>
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.text} />
               </ListItemButton>

@@ -9,8 +9,10 @@ import InputBase from '@mui/material/InputBase';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
-import MoreIcon from '@mui/icons-material/MoreVert';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { getAuth, onAuthStateChanged ,signOut } from 'firebase/auth';
+import app from '../../firebase';
+import toast, { Toaster } from 'react-hot-toast';
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -54,11 +56,32 @@ export default function Navbar() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     handleMobileMenuClose();
+    
+    if (showLogoutText) {
+      handleLogout();
+      setShowLogoutText(false);
+    }
   };
 
-  const handleMobileMenuOpen = (event) => {
-    setMobileMoreAnchorEl(event.currentTarget);
-    setShowLogoutText(false); // Reset the state when mobile menu is opened
+  const handleLogout = async () => {
+    const auth = getAuth(app);
+    try {
+      await signOut(auth);
+      toast.success('LOG OUT SUCCESS.', {
+        style: {
+          border: '1px solid #00425A',
+          background: '#E6D81C',
+          padding: '16px',
+          color: '#00425A',
+        },
+        iconTheme: {
+          primary: '#00425A',
+          secondary: '#FFFAEE',
+        },
+      });      
+    } catch (error) {
+      toast.error('LOG OUT FAILED.');
+    }
   };
 
   const menuId = 'primary-search-account-menu';

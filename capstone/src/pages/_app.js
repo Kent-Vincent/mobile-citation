@@ -3,29 +3,38 @@ import '@/styles/globals.css';
 import '../styles/Login.module.css';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase';
-import { use, useEffect } from 'react';
+import { useState, useEffect } from 'react'; 
 import Router from 'next/router';
-import Dashboard from './Dashboard';
+import { useRouter } from 'next/router';
+
 
 
 function MyApp({ Component, pageProps }) {
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  useEffect(()=>{
-    onAuthStateChanged(auth, (user) => {
-      if (user){
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setLoading(false);
+      if (user) {
         const uid = user.uid;
-        Router.push('/Home');
       }
       else{
-        Router.push('/');
+        router.push('/');
       }
     });
-  });
+
+    return () => unsubscribe();
+  }, [router]); 
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
       <div className="content">
-          <Component {...pageProps} />
+        <Component {...pageProps} />
       </div>
       <Toaster />
     </>
