@@ -95,7 +95,7 @@ export default function Dashboard() {
         </DrawerHeader>
         <List>
           {[
-            { text: 'Accounts', icon: <GroupIcon />, route: '/accounts' },
+            { text: 'Accounts', icon: <GroupIcon />, route: '/Accounts/Account' },
             { text: 'Transaction', icon: <ReceiptIcon />, route: '/Transaction/Transaction' },
           ].map((item, index) => (
             <ListItem key={item.text} disablePadding>
