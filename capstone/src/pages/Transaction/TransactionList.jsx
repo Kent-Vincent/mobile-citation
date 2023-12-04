@@ -57,7 +57,7 @@ const columns = [
     id: 'status',
     label: 'Status',
     minWidth: 100,
-    align: 'justify',
+    align: 'center',
     format: (value) => value.toFixed(2),
   },
 
