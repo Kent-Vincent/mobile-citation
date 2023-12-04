@@ -34,7 +34,6 @@ const Home = () => {
     <div>
       <Dashboard />
       <Navbar />
-      <h1>Home Page</h1>
       <button onClick={handleLogout}>Logout</button>
     </div>
   );
