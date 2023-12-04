@@ -1,10 +1,27 @@
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
-import Dashboard from '../components/Dashboard';
+import Dashboard from '../Dashboard';
+import { getAuth, onAuthStateChanged ,signOut } from 'firebase/auth';
+import { useRouter } from 'next/router';
+import app from '../../../firebase';
 import Toolbar from '@mui/material/Toolbar';
-import Navbar from '../components/Navbar';
-import TransactionList from '../components/TransactionList';
+import Navbar from '../Navbar';
+import TransactionList from './TransactionList';
 
-export default function Transaction() {
+const Transaction = () => {
+  const router = useRouter();
+  const auth = getAuth(app);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push('/');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth, router]);
+
   return (
     <>
       <Navbar />
@@ -19,3 +36,5 @@ export default function Transaction() {
     </>
   );
 }
+
+export default Transaction

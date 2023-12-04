@@ -22,9 +22,20 @@ const Login = () => {
       const user = userCredential.user;
 
     if (user.email === 'admin@gmail.com') {
-      router.push('/Home');
-    } else {
-      
+      router.push('/Transaction/Transaction');
+      toast.success('YOU ARE NOW SIGNED IN.', {
+        style: {
+          border: '1px solid #00425A',
+          background: '#E6D81C',
+          padding: '16px',
+          color: '#00425A',
+        },
+        iconTheme: {
+          primary: '#00425A',
+          secondary: '#FFFAEE',
+        },
+      }); 
+    } else { 
       toast.error('You are not an admin!', {
         position: 'top-center',
       });
