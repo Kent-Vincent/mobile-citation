@@ -5,6 +5,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { use, useEffect } from 'react';
 import Router from 'next/router';
+import Dashboard from './Dashboard';
+
 
 function MyApp({ Component, pageProps }) {
 
