@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -14,6 +14,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import { ref, onValue, getDatabase } from 'firebase/database';
 
 const columns = [
   { id: 'icon', label: 'Icon', minWidth: 30 },
@@ -22,18 +23,9 @@ const columns = [
   { id: 'edit', label: 'Edit', minWidth: 30 },
 ];
 
-function createData(violation, icon, totalprice) {
-  return { violation, icon, totalprice };
+function createData(violation, iconUrl, totalprice) {
+  return { violation, iconUrl, totalprice };
 }
-
-const initialRows = [
-  createData(
-    'Employing Insolent, Discourteous, or Arrogant Driver',
-    <AssessmentIcon />,
-    '1500'
-  ),
-  // Add more rows as needed
-];
 
 export default function ViolationList() {
   const [page, setPage] = useState(0);
@@ -44,8 +36,23 @@ export default function ViolationList() {
     violation: '',
     totalprice: '',
   });
-  const [dataRows, setDataRows] = useState(initialRows);
+  const [dataRows, setDataRows] = useState([]);
   const [uploadedIcon, setUploadedIcon] = useState(null);
+
+  useEffect(() => {
+    const database = getDatabase();
+    const violationsRef = ref(database, 'violations');
+
+    onValue(violationsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const violationData = Object.entries(data).map(([key, value]) =>
+          createData(value.Name, value.IconForViolationUrl, value.Price)
+        );
+        setDataRows(violationData);
+      }
+    });
+  }, []);
 
   const handleOpenEditDialog = (row) => {
     setSelectedRow(row);
@@ -59,7 +66,7 @@ export default function ViolationList() {
   const handleCloseEditDialog = () => {
     setOpenEditDialog(false);
     setSelectedRow(null);
-    setUploadedIcon(null); // Clear uploaded icon on dialog close
+    setUploadedIcon(null);
   };
 
   const handleViolationChange = (event) => {
@@ -87,7 +94,7 @@ export default function ViolationList() {
         ...selectedRow,
         violation: editedViolation.violation,
         totalprice: editedViolation.totalprice,
-        icon: uploadedIcon || selectedRow.icon, // Use uploaded icon or previous icon
+        icon: uploadedIcon || selectedRow.icon,
       };
 
       const updatedRows = dataRows.map((row) =>
@@ -110,10 +117,10 @@ export default function ViolationList() {
     setPage(0);
   };
 
+
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-
-<TableContainer sx={{ maxHeight: 'calc(100vh - 200px)' }}>
+      <TableContainer sx={{ maxHeight: 'calc(100vh - 200px)' }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -136,7 +143,7 @@ export default function ViolationList() {
                   <TableRow hover role="checkbox" tabIndex={-1} key={index}>
                     {columns.map((column) => {
                       const value = row[column.id];
-                      return (  
+                      return (
                         <TableCell key={column.id} align={column.align}>
                           {column.id === 'edit' ? (
                             <button
@@ -147,8 +154,8 @@ export default function ViolationList() {
                             </button>
                           ) : column.id === 'icon' ? (
                             <img
-                              src={row.icon}
-                              alt="Uploaded Icon"
+                              src={row.iconUrl}  // Use the icon URL from the data
+                              alt={`Icon for ${row.violation}`}
                               style={{ maxWidth: '50px' }}
                             />
                           ) : column.format && typeof value === 'number' ? (
