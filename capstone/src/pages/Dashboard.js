@@ -15,6 +15,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import GroupIcon from '@mui/icons-material/Group';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import { useRouter } from 'next/router';
 
 const drawerWidth = 240;
@@ -97,6 +98,7 @@ export default function Dashboard() {
           {[
             { text: 'Accounts', icon: <GroupIcon />, route: '/Accounts/Account' },
             { text: 'Transaction', icon: <ReceiptIcon />, route: '/Transaction/Transaction' },
+            { text: 'Report Analysis', icon: <AssessmentIcon/>, route: '/Assesment/Assesment' },
           ].map((item, index) => (
             <ListItem key={item.text} disablePadding>
               <ListItemButton onClick={() => handleNavigation(item.route)}>
