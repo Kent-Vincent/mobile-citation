@@ -16,8 +16,8 @@ import TextField from '@mui/material/TextField';
 import {ref, onValue, getDatabase } from 'firebase/database';
 
 const columns = [
-  { id: 'name', label: 'Name' },
-  { id: 'email', label: 'Email' },
+  { id: 'name', label: 'Name', minWidth: 150 },
+  { id: 'email', label: 'Email', minWidth: 100 },
   ];
 
   function createData(name, email) {
