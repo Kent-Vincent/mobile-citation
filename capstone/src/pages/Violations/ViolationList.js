@@ -16,9 +16,9 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
 const columns = [
-  { id: 'violation', label: 'Violation', minWidth: 150 },
   { id: 'icon', label: 'Icon', minWidth: 50 },
-  { id: 'totalprice', label: 'Total Price', minWidth: 130, align: 'justify' },
+  { id: 'violation', label: 'Violation', minWidth: 150 },
+  { id: 'totalprice', label: 'Price', minWidth: 130, align: 'justify' },
   { id: 'edit', label: 'Edit', minWidth: 50 },
 ];
 
