@@ -16,10 +16,10 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
 const columns = [
-  { id: 'icon', label: 'Icon', minWidth: 50 },
-  { id: 'violation', label: 'Violation', minWidth: 150 },
-  { id: 'totalprice', label: 'Price', minWidth: 130, align: 'justify' },
-  { id: 'edit', label: 'Edit', minWidth: 50 },
+  { id: 'icon', label: 'Icon', minWidth: 30 },
+  { id: 'violation', label: 'Violation', minWidth: 100 },
+  { id: 'totalprice', label: 'Price', minWidth: 80, align: 'justify' },
+  { id: 'edit', label: 'Edit', minWidth: 30 },
 ];
 
 function createData(violation, icon, totalprice) {
@@ -136,7 +136,7 @@ export default function ViolationList() {
                   <TableRow hover role="checkbox" tabIndex={-1} key={index}>
                     {columns.map((column) => {
                       const value = row[column.id];
-                      return (
+                      return (  
                         <TableCell key={column.id} align={column.align}>
                           {column.id === 'edit' ? (
                             <button
