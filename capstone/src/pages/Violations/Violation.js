@@ -13,7 +13,6 @@ export default function Violation() {
         <Dashboard />
         <Box component="main" sx={{ flexGrow: 1, p: 1 }}>
           <Toolbar />
-          <h1 style={{ margin: '15px 0', color: '#00425A', fontWeight: 'bold' }}>Violations</h1>
           <ViolationList />
         </Box>
       </Box>
