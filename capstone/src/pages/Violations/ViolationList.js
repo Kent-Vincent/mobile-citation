@@ -14,6 +14,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import Loading from '../Loading';
 import { ref, onValue, getDatabase } from 'firebase/database';
 
 const columns = [
@@ -38,6 +39,7 @@ export default function ViolationList() {
   });
   const [dataRows, setDataRows] = useState([]);
   const [uploadedIcon, setUploadedIcon] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const database = getDatabase();
@@ -50,6 +52,7 @@ export default function ViolationList() {
           createData(value.Name, value.IconForViolationUrl, value.Price)
         );
         setDataRows(violationData);
+        setLoading(false);
       }
     });
   }, []);
@@ -117,115 +120,149 @@ export default function ViolationList() {
     setPage(0);
   };
 
-
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 'calc(100vh - 200px)' }}>
-        <Table stickyHeader aria-label="sticky table">
-          <TableHead>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth, fontWeight: 'bold' }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {dataRows
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row, index) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={index}>
-                    {columns.map((column) => {
-                      const value = row[column.id];
+    <div style={{ position: 'relative', margin: '20px' }}>
+      {loading && (
+        <Loading
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 1,
+          }}
+        />
+      )}
+      {!loading && (
+        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+          <>
+            <TableContainer sx={{ maxHeight: 'calc(100vh - 200px)' }}>
+              <Table stickyHeader aria-label="sticky table">
+                <TableHead>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        align={column.align}
+                        style={{ minWidth: column.minWidth, fontWeight: 'bold' }}
+                      >
+                        {column.label}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {dataRows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row, index) => {
                       return (
-                        <TableCell key={column.id} align={column.align}>
-                          {column.id === 'edit' ? (
-                            <button
-                              style={{ border: 'none', background: 'none' }}
-                              onClick={() => handleOpenEditDialog(row)}
-                            >
-                              <EditIcon />
-                            </button>
-                          ) : column.id === 'icon' ? (
-                            <img
-                              src={row.iconUrl}  // Use the icon URL from the data
-                              alt={`Icon for ${row.violation}`}
-                              style={{ maxWidth: '50px' }}
-                            />
-                          ) : column.format && typeof value === 'number' ? (
-                            column.format(value)
-                          ) : (
-                            value
-                          )}
-                        </TableCell>
+                        <TableRow hover role="checkbox" tabIndex={-1} key={index}>
+                          {columns.map((column) => {
+                            const value = row[column.id];
+                            return (
+                              <TableCell key={column.id} align={column.align}>
+                                {column.id === 'edit' ? (
+                                  <button
+                                    style={{ border: 'none', background: 'none' }}
+                                    onClick={() => handleOpenEditDialog(row)}
+                                  >
+                                    <EditIcon />
+                                  </button>
+                                ) : column.id === 'icon' ? (
+                                  <>
+                                    {row.iconLoading ? (
+                                      <LoadingIcon />
+                                    ) : (
+                                      <img
+                                        src={row.iconUrl}
+                                        alt={`Icon for ${row.violation}`}
+                                        style={{ maxWidth: '50px' }}
+                                        onLoad={() => {
+                                          setDataRows((prevRows) =>
+                                            prevRows.map((prevRow) =>
+                                              prevRow === row ? {...prevRow, iconLoading: false } : prevRow
+                                            )
+                                          );
+                                        }}
+                                        onError={() => {
+                                          setDataRows((prevRows) =>
+                                          prevRows.map((prevRow) =>
+                                            prevRow === row ? {...prevRow, iconLoading: false } :prevRow
+                                            )
+                                          );
+                                        }}
+                                      />
+                                    )}
+                                  </>
+                                ) : column.format && typeof value === 'number' ? (
+                                  column.format(value)
+                                ) : (
+                                  value
+                                )}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
                       );
                     })}
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={dataRows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-      {selectedRow && (
-        <Dialog open={openEditDialog} onClose={handleCloseEditDialog}>
-          <DialogTitle>Edit Violation</DialogTitle>
-          <DialogContent>
-            <TextField
-              label="Violation Name"
-              name="violation"
-              value={editedViolation.violation}
-              onChange={handleViolationChange}
-              fullWidth
-              margin="normal"
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[10, 25, 100]}
+              component="div"
+              count={dataRows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
             />
-            {/* Displaying the uploaded icon or default icon */}
-            {uploadedIcon ? (
-              <img
-                src={uploadedIcon}
-                alt="Uploaded Icon"
-                style={{ maxWidth: '50px' }}
-              />
-            ) : (
-              <img
-                src={selectedRow.icon}
-                alt="Default Icon"
-                style={{ maxWidth: '50px' }}
-              />
+            {selectedRow && (
+              <Dialog open={openEditDialog} onClose={handleCloseEditDialog}>
+                <DialogTitle>Edit Violation</DialogTitle>
+                <DialogContent>
+                  <TextField
+                    label="Violation Name"
+                    name="violation"
+                    value={editedViolation.violation}
+                    onChange={handleViolationChange}
+                    fullWidth
+                    margin="normal"
+                  />
+                  {uploadedIcon ? (
+                    <img
+                      src={uploadedIcon}
+                      alt="Uploaded Icon"
+                      style={{ maxWidth: '50px' }}
+                    />
+                  ) : (
+                    <img
+                      src={selectedRow.icon}
+                      alt="Default Icon"
+                      style={{ maxWidth: '50px' }}
+                    />
+                  )}
+                  <input
+                    type="file"
+                    onChange={handleIconUpload}
+                    accept="image/*"
+                  />
+                  <TextField
+                    label="Total Price"
+                    name="totalprice"
+                    value={editedViolation.totalprice}
+                    onChange={handleViolationChange}
+                    fullWidth
+                    margin="normal"
+                  />
+                  <Button onClick={handleSaveChanges}>Save Changes</Button>
+                  <Button onClick={handleCloseEditDialog}>Cancel</Button>
+                </DialogContent>
+              </Dialog>
             )}
-            {/* File input for icon upload */}
-            <input
-              type="file"
-              onChange={handleIconUpload}
-              accept="image/*"
-            />
-            <TextField
-              label="Total Price"
-              name="totalprice"
-              value={editedViolation.totalprice}
-              onChange={handleViolationChange}
-              fullWidth
-              margin="normal"
-            />
-            <Button onClick={handleSaveChanges}>Save Changes</Button>
-            <Button onClick={handleCloseEditDialog}>Cancel</Button>
-          </DialogContent>
-        </Dialog>
+          </>
+        </Paper>
       )}
-    </Paper>
+    </div>
   );
 }
