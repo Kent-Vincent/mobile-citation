@@ -1,6 +1,7 @@
 import { Toaster } from 'react-hot-toast';
 import '@/styles/globals.css';
 import '../styles/Login.module.css';
+import '../styles/loading.module.css';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { useState, useEffect } from 'react'; 
