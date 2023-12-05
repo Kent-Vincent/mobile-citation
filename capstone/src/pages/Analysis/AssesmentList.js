@@ -2,6 +2,11 @@ import * as React from 'react';
 import { TableCell, TableRow, Box, Collapse, IconButton, Typography } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import TableContainer from '@mui/material/TableContainer';
+import TableBody from '@mui/material/TableBody';
+import TableHead from '@mui/material/TableHead';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
 import PropTypes from 'prop-types';
 
 function createData(name, timeanddate, location, licensenumber, platenumber, violation) {

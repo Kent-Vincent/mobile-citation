@@ -98,7 +98,7 @@ export default function Dashboard() {
           {[
             { text: 'Accounts', icon: <GroupIcon />, route: '/Accounts/Account' },
             { text: 'Transaction', icon: <ReceiptIcon />, route: '/Transaction/Transaction' },
-            { text: 'Report Analysis', icon: <AssessmentIcon/>, route: '/Assesment/Assesment' },
+            { text: 'Report Analysis', icon: <AssessmentIcon/>, route: 'Analysis/Assesment' },
           ].map((item, index) => (
             <ListItem key={item.text} disablePadding>
               <ListItemButton onClick={() => handleNavigation(item.route)}>
