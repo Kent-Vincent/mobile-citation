@@ -8,13 +8,13 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import EditIcon from '@mui/icons-material/Edit';
-import AssessmentIcon from '@mui/icons-material/Assessment';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Loading from '../Loading';
+import AddViolation from './addViolation';
 import { ref, onValue, getDatabase } from 'firebase/database';
 
 const columns = [
@@ -40,6 +40,7 @@ export default function ViolationList() {
   const [dataRows, setDataRows] = useState([]);
   const [uploadedIcon, setUploadedIcon] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
 
   useEffect(() => {
     const database = getDatabase();
@@ -56,6 +57,14 @@ export default function ViolationList() {
       }
     });
   }, []);
+
+  const handleOpenAddDialog = () => {
+    setOpenAddDialog(true);
+  };
+
+  const handleCloseAddDialog = () => {
+    setOpenAddDialog(false);
+  };
 
   const handleOpenEditDialog = (row) => {
     setSelectedRow(row);
@@ -136,6 +145,14 @@ export default function ViolationList() {
       {!loading && (
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
           <>
+            <Button
+              variant="contained"
+              color="primary"
+              style={{ margin: '10px', float: 'right' }}
+              onClick={handleOpenAddDialog}
+            >
+              Add Violation
+            </Button>
             <TableContainer sx={{ maxHeight: 'calc(100vh - 200px)' }}>
               <Table stickyHeader aria-label="sticky table">
                 <TableHead>
@@ -260,6 +277,7 @@ export default function ViolationList() {
                 </DialogContent>
               </Dialog>
             )}
+            <AddViolation open={openAddDialog} onClose={handleCloseAddDialog} />
           </>
         </Paper>
       )}
