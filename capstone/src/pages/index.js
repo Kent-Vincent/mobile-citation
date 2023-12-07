@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import app from '../../firebase';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/router';
 import styles from '../styles/Login.module.css';
 import toast, { Toaster } from 'react-hot-toast';
@@ -10,6 +10,17 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const router = useRouter();
   const auth = getAuth(app);
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push('/Transaction/Transaction');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth, router]);
 
   const handleLogin = async () => {
     try {
