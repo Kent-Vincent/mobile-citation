@@ -36,24 +36,41 @@ export default function AddViolation({ open, onClose }) {
     }
   };
 
+  const handleBoxClick = (event) => {
+    event.preventDefault();
+
+    const fileInput = document.getElementById('icon-upload');
+    fileInput.focus();
+  
+    fileInput.click();
+  };
+
   const handleAddViolation = () => {
     // Check if any of the fields are empty
     if (!newViolation.violation || !newViolation.price || !newViolation.icon) {
-      toast.error('Please fill in all fields.');
+      if (!newViolation.violation) {
+        toast.error('Please Input A Violation.');
+      } else if (!newViolation.price) {
+        toast.error('Please Input A Price.');
+      } else if (!newViolation.icon) {
+        toast.error('Please Input An Icon.');
+      } else {
+        toast.error('Please fill in all fields.');
+      }
       return;
     }
-  
+
     // Handle adding violation to the database (you can implement this later)
     // For now, just log the new violation details
     console.log('New Violation:', newViolation);
-  
+
     // Clear the form
     setNewViolation({
       icon: null,
       violation: '',
       price: '',
     });
-  
+
     // Close the dialog
     onClose();
   };
@@ -62,24 +79,41 @@ export default function AddViolation({ open, onClose }) {
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Add Violation</DialogTitle>
       <DialogContent>
-        <label htmlFor="icon-upload" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <CloudUploadIcon style={{ fontSize: 48, marginBottom: 8 }} />
-          <span>Browse files to upload</span>
-        </label>
-        <input
-          type="file"
-          id="icon-upload"
-          style={{ display: 'none' }}
-          onChange={handleIconUpload}
-          accept="image/*"
-        />
-        {newViolation.icon && (
-          <img
-            src={newViolation.icon}
-            alt="Uploaded Icon"
-            style={{ maxWidth: '50px', margin: '16px auto', display: 'block' }}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div
+            style={{
+              border: '1px solid #ccc',
+              padding: '16px',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              cursor: 'pointer',
+            }}
+            onClick={handleBoxClick}
+          >
+            {newViolation.icon ? (
+              <div style={{ textAlign: 'center' }}>
+                <img
+                  src={newViolation.icon}
+                  alt="Uploaded Icon"
+                  style={{ maxWidth: '50px', display: 'block', margin: '0 auto' }}
+                />
+                {newViolation.icon && <span>Change Photo</span>}
+              </div>
+            ) : (
+              <label htmlFor="icon-upload" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <CloudUploadIcon style={{ fontSize: 48, marginBottom: 8 }} />
+                {!newViolation.icon && <span>Browse files to upload</span>}
+              </label>
+            )}
+          </div>
+          <input
+            type="file"
+            id="icon-upload"
+            style={{ display: 'none' }}
+            onChange={handleIconUpload}
+            accept="image/*"
           />
-        )}
+        </div>
 
         <TextField
           label="Violation Name"
@@ -97,17 +131,21 @@ export default function AddViolation({ open, onClose }) {
           fullWidth
           margin="normal"
         />
-        <Button
-          onClick={handleAddViolation}
-          style={{ float: 'right' }}
-        >
+        <Button onClick={handleAddViolation} style={{ float: 'right' }}>
           Add Violation
         </Button>
         <Button
-          onClick={onClose}
-          style={{ float: 'right' }}
+         onClick={() => {
+          setNewViolation({
+          icon: null,
+          violation: '',
+          price: '',
+        });
+        onClose();
+        }}
+        style={{ float: 'right' }}
         >
-          Cancel
+        Cancel
         </Button>
       </DialogContent>
     </Dialog>
