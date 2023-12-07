@@ -5,7 +5,9 @@ import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getDatabase, ref as dbRef, set, push} from 'firebase/database';
 
 export default function AddViolation({ open, onClose }) {
   const [newViolation, setNewViolation] = useState({
@@ -25,28 +27,34 @@ export default function AddViolation({ open, onClose }) {
   const handleIconUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+      try {
         setNewViolation((prev) => ({
           ...prev,
-          icon: reader.result,
+          icon: file,
         }));
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('Error reading the file:', error);
+      }
     }
   };
 
   const handleBoxClick = (event) => {
     event.preventDefault();
-
     const fileInput = document.getElementById('icon-upload');
     fileInput.focus();
-  
     fileInput.click();
   };
 
-  const handleAddViolation = () => {
-    // Check if any of the fields are empty
+  const uploadImageToStorage = async (file) => {
+    const storage = getStorage();
+    const storageRef = ref(storage, `uploads/icon for violations/${file.name}`);
+    await uploadBytes(storageRef, file);
+    return getDownloadURL(storageRef);
+  };
+
+  const handleAddViolation = async () => {
+    const db = getDatabase();
+  
     if (!newViolation.violation || !newViolation.price || !newViolation.icon) {
       if (!newViolation.violation) {
         toast.error('Please Input A Violation.');
@@ -59,21 +67,35 @@ export default function AddViolation({ open, onClose }) {
       }
       return;
     }
-
-    // Handle adding violation to the database (you can implement this later)
-    // For now, just log the new violation details
-    console.log('New Violation:', newViolation);
-
-    // Clear the form
-    setNewViolation({
-      icon: null,
-      violation: '',
-      price: '',
-    });
-
-    // Close the dialog
-    onClose();
-  };
+  
+    try {
+      const imageUrl = await uploadImageToStorage(newViolation.icon);
+  
+      const newViolationData = {
+        IconForViolationUrl: imageUrl,
+        Name: newViolation.violation,
+        Price: newViolation.price,
+        SortOrder: 1,
+      };
+  
+      const newViolationRef = push(dbRef(db, 'violations'));
+      await set(newViolationRef, newViolationData);
+  
+      toast.success('Violation added successfully.');
+      console.log('New Violation:', newViolation);
+  
+      setNewViolation({
+        icon: null,
+        violation: '',
+        price: '',
+      });
+  
+      onClose();
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An error occurred. Please try again.');
+    }
+  };  
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -93,7 +115,7 @@ export default function AddViolation({ open, onClose }) {
             {newViolation.icon ? (
               <div style={{ textAlign: 'center' }}>
                 <img
-                  src={newViolation.icon}
+                  src={newViolation.icon instanceof File ? URL.createObjectURL(newViolation.icon) : newViolation.icon}
                   alt="Uploaded Icon"
                   style={{ maxWidth: '50px', display: 'block', margin: '0 auto' }}
                 />
@@ -135,17 +157,17 @@ export default function AddViolation({ open, onClose }) {
           Add Violation
         </Button>
         <Button
-         onClick={() => {
-          setNewViolation({
-          icon: null,
-          violation: '',
-          price: '',
-        });
-        onClose();
-        }}
-        style={{ float: 'right' }}
+          onClick={() => {
+            setNewViolation({
+              icon: null,
+              violation: '',
+              price: '',
+            });
+            onClose();
+          }}
+          style={{ float: 'right' }}
         >
-        Cancel
+          Cancel
         </Button>
       </DialogContent>
     </Dialog>
