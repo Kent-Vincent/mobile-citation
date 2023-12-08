@@ -15,6 +15,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Loading from '../Loading';
 import AddViolation from './addViolation';
+import EditViolation from './editViolation';
 import { ref, onValue, getDatabase } from 'firebase/database';
 
 const columns = [
@@ -24,8 +25,8 @@ const columns = [
   { id: 'edit', label: 'Edit', minWidth: 30 },
 ];
 
-function createData(violation, iconUrl, totalprice) {
-  return { violation, iconUrl, totalprice };
+function createData(violation, iconUrl, totalprice, locationId) {
+  return { violation, iconUrl, totalprice, locationId };
 }
 
 export default function ViolationList() {
@@ -50,7 +51,7 @@ export default function ViolationList() {
       const data = snapshot.val();
       if (data) {
         const violationData = Object.entries(data).map(([key, value]) =>
-          createData(value.Name, value.IconForViolationUrl, value.Price)
+        createData(value.Name, value.IconForViolationUrl, value.Price, key)
         );
         setDataRows(violationData);
         setLoading(false);
@@ -59,7 +60,9 @@ export default function ViolationList() {
   }, []);
 
   const handleOpenAddDialog = () => {
-    setOpenAddDialog(true);
+    if (!loading) {
+      setOpenAddDialog(true);
+    }
   };
 
   const handleCloseAddDialog = () => {
@@ -72,6 +75,7 @@ export default function ViolationList() {
       violation: row.violation,
       totalprice: row.totalprice,
     });
+    setUploadedIcon(row.iconUrl);
     setOpenEditDialog(true);
   };
 
@@ -153,6 +157,7 @@ export default function ViolationList() {
             >
               Add Violation
             </Button>
+            <AddViolation open={openAddDialog} onClose={handleCloseAddDialog} />
             <TableContainer sx={{ maxHeight: 'calc(100vh - 200px)' }}>
               <Table stickyHeader aria-label="sticky table">
                 <TableHead>
@@ -203,8 +208,8 @@ export default function ViolationList() {
                                         }}
                                         onError={() => {
                                           setDataRows((prevRows) =>
-                                          prevRows.map((prevRow) =>
-                                            prevRow === row ? {...prevRow, iconLoading: false } :prevRow
+                                            prevRows.map((prevRow) =>
+                                              prevRow === row ? {...prevRow, iconLoading: false } : prevRow
                                             )
                                           );
                                         }}
@@ -235,49 +240,17 @@ export default function ViolationList() {
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
             {selectedRow && (
-              <Dialog open={openEditDialog} onClose={handleCloseEditDialog}>
-                <DialogTitle>Edit Violation</DialogTitle>
-                <DialogContent>
-                  <TextField
-                    label="Violation Name"
-                    name="violation"
-                    value={editedViolation.violation}
-                    onChange={handleViolationChange}
-                    fullWidth
-                    margin="normal"
-                  />
-                  {uploadedIcon ? (
-                    <img
-                      src={uploadedIcon}
-                      alt="Uploaded Icon"
-                      style={{ maxWidth: '50px' }}
-                    />
-                  ) : (
-                    <img
-                      src={selectedRow.icon}
-                      alt="Default Icon"
-                      style={{ maxWidth: '50px' }}
-                    />
-                  )}
-                  <input
-                    type="file"
-                    onChange={handleIconUpload}
-                    accept="image/*"
-                  />
-                  <TextField
-                    label="Total Price"
-                    name="totalprice"
-                    value={editedViolation.totalprice}
-                    onChange={handleViolationChange}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <Button onClick={handleSaveChanges}>Save Changes</Button>
-                  <Button onClick={handleCloseEditDialog}>Cancel</Button>
-                </DialogContent>
-              </Dialog>
+              <EditViolation
+                open={openEditDialog}
+                onClose={handleCloseEditDialog}
+                selectedRow={selectedRow}
+                handleSaveChanges={handleSaveChanges}
+                handleViolationChange={handleViolationChange}
+                uploadedIcon={uploadedIcon}
+                handleIconUpload={handleIconUpload}
+                locationId={selectedRow.locationId} 
+              />
             )}
-            <AddViolation open={openAddDialog} onClose={handleCloseAddDialog} />
           </>
         </Paper>
       )}

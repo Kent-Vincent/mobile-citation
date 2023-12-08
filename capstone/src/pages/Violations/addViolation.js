@@ -75,7 +75,6 @@ export default function AddViolation({ open, onClose }) {
         IconForViolationUrl: imageUrl,
         Name: newViolation.violation,
         Price: newViolation.price,
-        SortOrder: 1,
       };
   
       const newViolationRef = push(dbRef(db, 'violations'));
