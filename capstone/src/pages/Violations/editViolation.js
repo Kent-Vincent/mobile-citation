@@ -36,7 +36,7 @@ const EditViolation = ({
       const file = event.target.files[0];
   
       if (file) {
-  
+        
         const storage = getStorage();
         const uniqueIdentifier = Date.now();
         const storageReference = storageRef(

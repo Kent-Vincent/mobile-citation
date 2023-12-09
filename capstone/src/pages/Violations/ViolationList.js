@@ -16,13 +16,16 @@ import TextField from '@mui/material/TextField';
 import Loading from '../Loading';
 import AddViolation from './addViolation';
 import EditViolation from './editViolation';
-import { ref, onValue, getDatabase } from 'firebase/database';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DialogActions from '@mui/material/DialogActions';
+import { ref, onValue, getDatabase, remove } from 'firebase/database';
 
 const columns = [
   { id: 'icon', label: 'Icon', minWidth: 30 },
   { id: 'violation', label: 'Violation', minWidth: 100 },
   { id: 'totalprice', label: 'Price', minWidth: 80, align: 'justify' },
   { id: 'edit', label: 'Edit', minWidth: 30 },
+  { id: 'delete', label: 'Delete', minWidth: 30 },
 ];
 
 function createData(violation, iconUrl, totalprice, locationId) {
@@ -42,6 +45,8 @@ export default function ViolationList() {
   const [uploadedIcon, setUploadedIcon] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTargetRow, setDeleteTargetRow] = useState(null);
 
   useEffect(() => {
     const database = getDatabase();
@@ -58,6 +63,41 @@ export default function ViolationList() {
       }
     });
   }, []);
+
+  const handleDelete = (locationId) => {
+    const rowToDelete = dataRows.find((row) => row.locationId === locationId);
+    if (rowToDelete) {
+      setDeleteTargetRow(rowToDelete);
+      setDeleteDialogOpen(true);
+    }
+  };
+
+  const handleOpenDeleteDialog = (row) => {
+    setDeleteTargetRow(row);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteTargetRow(null);
+    setDeleteDialogOpen(false);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteTargetRow) {
+      const database = getDatabase();
+      const violationRef = ref(database, `violations/${deleteTargetRow.locationId}`);
+      remove(violationRef)
+        .then(() => {
+          // Handle success, close the dialog, and update the UI if needed
+          handleCloseDeleteDialog();
+        })
+        .catch((error) => {
+          // Handle error, log or show an error message
+          console.error('Error deleting violation:', error);
+          handleCloseDeleteDialog();
+        });
+    }
+  };
 
   const handleOpenAddDialog = () => {
     if (!loading) {
@@ -149,15 +189,8 @@ export default function ViolationList() {
       {!loading && (
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
           <>
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ margin: '10px', float: 'right' }}
-              onClick={handleOpenAddDialog}
-            >
-              Add Violation
-            </Button>
-            <AddViolation open={openAddDialog} onClose={handleCloseAddDialog} />
+            {/* Other JSX code... */}
+
             <TableContainer sx={{ maxHeight: 'calc(100vh - 200px)' }}>
               <Table stickyHeader aria-label="sticky table">
                 <TableHead>
@@ -190,6 +223,13 @@ export default function ViolationList() {
                                   >
                                     <EditIcon />
                                   </button>
+                                ) : column.id === 'delete' ? (
+                                  <button
+                                    style={{ border: 'none', background: 'none' }}
+                                    onClick={() => handleOpenDeleteDialog(row)}
+                                  >
+                                    <DeleteIcon />
+                                  </button>
                                 ) : column.id === 'icon' ? (
                                   <>
                                     {row.iconLoading ? (
@@ -202,14 +242,14 @@ export default function ViolationList() {
                                         onLoad={() => {
                                           setDataRows((prevRows) =>
                                             prevRows.map((prevRow) =>
-                                              prevRow === row ? {...prevRow, iconLoading: false } : prevRow
+                                              prevRow === row ? { ...prevRow, iconLoading: false } : prevRow
                                             )
                                           );
                                         }}
                                         onError={() => {
                                           setDataRows((prevRows) =>
                                             prevRows.map((prevRow) =>
-                                              prevRow === row ? {...prevRow, iconLoading: false } : prevRow
+                                              prevRow === row ? { ...prevRow, iconLoading: false } : prevRow
                                             )
                                           );
                                         }}
@@ -248,9 +288,29 @@ export default function ViolationList() {
                 handleViolationChange={handleViolationChange}
                 uploadedIcon={uploadedIcon}
                 handleIconUpload={handleIconUpload}
-                locationId={selectedRow.locationId} 
+                locationId={selectedRow.locationId}
               />
             )}
+
+            <Dialog
+              open={deleteDialogOpen}
+              onClose={handleCloseDeleteDialog}
+              aria-labelledby="delete-dialog-title"
+              aria-describedby="delete-dialog-description"
+            >
+              <DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
+              <DialogContent>
+                <p>Are you sure you want to delete this violation?</p>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseDeleteDialog} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={handleConfirmDelete} color="primary">
+                  Confirm
+                </Button>
+              </DialogActions>
+            </Dialog>
           </>
         </Paper>
       )}
