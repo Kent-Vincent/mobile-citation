@@ -111,11 +111,8 @@ export default function ViolationList() {
 
   const handleOpenEditDialog = (row) => {
     setSelectedRow(row);
-    setEditedViolation({
-      violation: row.violation,
-      totalprice: row.totalprice,
-    });
-    setUploadedIcon(row.iconUrl);
+    setSelectedViolation(row.violation);
+    setSelectedPrice(row.totalprice);
     setOpenEditDialog(true);
   };
 
@@ -189,8 +186,14 @@ export default function ViolationList() {
       {!loading && (
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
           <>
-            {/* Other JSX code... */}
-
+            <Button
+              variant="contained"
+              color="primary"
+              style={{ margin: '10px', float: 'right' }}
+              onClick={handleOpenAddDialog}
+            >
+              Add Violation
+            </Button>
             <TableContainer sx={{ maxHeight: 'calc(100vh - 200px)' }}>
               <Table stickyHeader aria-label="sticky table">
                 <TableHead>
@@ -311,9 +314,10 @@ export default function ViolationList() {
                 </Button>
               </DialogActions>
             </Dialog>
+            <AddViolation open={openAddDialog} onClose={handleCloseAddDialog} />
           </>
         </Paper>
       )}
     </div>
   );
-}
+}  

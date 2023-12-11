@@ -116,7 +116,7 @@ export default function AddViolation({ open, onClose }) {
                 <img
                   src={newViolation.icon instanceof File ? URL.createObjectURL(newViolation.icon) : newViolation.icon}
                   alt="Uploaded Icon"
-                  style={{ maxWidth: '50px', display: 'block', margin: '0 auto' }}
+                  style={{ maxWidth: '100px', display: 'block', margin: '0 auto' }}
                 />
                 {newViolation.icon && <span>Change Photo</span>}
               </div>
