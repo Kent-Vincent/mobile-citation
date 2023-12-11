@@ -15,6 +15,7 @@ export default function AddViolation({ open, onClose }) {
     violation: '',
     price: '',
   });
+  const [loading, setLoading] = useState(false);
 
   const handleViolationChange = (event) => {
     const { name, value } = event.target;
@@ -47,7 +48,8 @@ export default function AddViolation({ open, onClose }) {
 
   const uploadImageToStorage = async (file) => {
     const storage = getStorage();
-    const storageRef = ref(storage, `uploads/icon for violations/${file.name}`);
+    const uniqueIdentifier = Date.now();
+    const storageRef = ref(storage, `uploads/icon for violations/${file.name}_${uniqueIdentifier}`);
     await uploadBytes(storageRef, file);
     return getDownloadURL(storageRef);
   };
@@ -69,6 +71,7 @@ export default function AddViolation({ open, onClose }) {
     }
   
     try {
+      setLoading(true);
       const imageUrl = await uploadImageToStorage(newViolation.icon);
   
       const newViolationData = {
@@ -80,7 +83,18 @@ export default function AddViolation({ open, onClose }) {
       const newViolationRef = push(dbRef(db, 'violations'));
       await set(newViolationRef, newViolationData);
   
-      toast.success('Violation added successfully.');
+      toast.success('Successfully Added!', {
+        style: {
+          border: '1px solid #00425A',
+          background: '#E6D81C',
+          padding: '16px',
+          color: '#00425A',
+        },
+        iconTheme: {
+          primary: '#00425A',
+          secondary: '#FFFAEE',
+        },
+      }); 
       console.log('New Violation:', newViolation);
   
       setNewViolation({
@@ -93,6 +107,8 @@ export default function AddViolation({ open, onClose }) {
     } catch (error) {
       console.error('Error:', error);
       toast.error('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };  
 
@@ -108,34 +124,39 @@ export default function AddViolation({ open, onClose }) {
               borderRadius: '8px',
               marginBottom: '16px',
               cursor: 'pointer',
+              position: 'relative',
             }}
             onClick={handleBoxClick}
           >
             {newViolation.icon ? (
               <div style={{ textAlign: 'center' }}>
                 <img
-                  src={newViolation.icon instanceof File ? URL.createObjectURL(newViolation.icon) : newViolation.icon}
+                  src={
+                    newViolation.icon instanceof File
+                      ? URL.createObjectURL(newViolation.icon)
+                      : newViolation.icon
+                  }
                   alt="Uploaded Icon"
                   style={{ maxWidth: '100px', display: 'block', margin: '0 auto' }}
                 />
                 {newViolation.icon && <span>Change Photo</span>}
               </div>
             ) : (
-              <label htmlFor="icon-upload" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <CloudUploadIcon style={{ fontSize: 48, marginBottom: 8 }} />
-                {!newViolation.icon && <span>Browse files to upload</span>}
+              <label
+                htmlFor="icon-upload"
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+              >
+                {loading ? (
+                  <CircularProgress style={{ fontSize: 48, marginBottom: 8 }} />
+                ) : (
+                  <CloudUploadIcon style={{ fontSize: 48, marginBottom: 8 }} />
+                )}
+                {!newViolation.icon && <span>{loading ? 'Uploading...' : 'Browse files to upload'}</span>}
               </label>
             )}
           </div>
-          <input
-            type="file"
-            id="icon-upload"
-            style={{ display: 'none' }}
-            onChange={handleIconUpload}
-            accept="image/*"
-          />
+          <input type="file" id="icon-upload" style={{ display: 'none' }} onChange={handleIconUpload} accept="image/*" />
         </div>
-
         <TextField
           label="Violation Name"
           name="violation"
@@ -153,7 +174,7 @@ export default function AddViolation({ open, onClose }) {
           margin="normal"
         />
         <Button onClick={handleAddViolation} style={{ float: 'right' }}>
-          Add Violation
+          {loading ? 'Adding...' : 'Add Violation'}
         </Button>
         <Button
           onClick={() => {
