@@ -225,7 +225,7 @@ export default function ViolationList() {
                                   </button>
                                 ) : column.id === 'delete' ? (
                                   <button
-                                    style={{ border: 'none', background: 'none' }}
+                                    style={{ border: 'none', background: 'none', color: 'red'  }}
                                     onClick={() => handleOpenDeleteDialog(row)}
                                   >
                                     <DeleteIcon />
