@@ -18,20 +18,19 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 import Loading from '../Loading';
-import { ref, onValue, getDatabase } from 'firebase/database';
+import { getDatabase, ref, push, set, onValue, remove } from 'firebase/database';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 
 const columns = [
-  { id: 'name', label: 'Name', minWidth: 150 },
-  { id: 'email', label: 'Email', minWidth: 200 },
-  { id: 'accountType', label: 'Account Type', minWidth: 150 },
+  { id: 'Name', label: 'Name', minWidth: 150 },
+  { id: 'Email', label: 'Email', minWidth: 200 },
+  { id: 'AccountType', label: 'Account Type', minWidth: 150 },
   { id: 'delete', minWidth: 150 },
-
 ];
 
-function createData(name, email, accountType) {
-  return { name, email, accountType };
+function createData(Name, Email, AccountType, key) {
+  return { Name, Email, AccountType, key };
 }
 
 export default function TransactionList() {
@@ -39,10 +38,10 @@ export default function TransactionList() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [items, setItems] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [Name, setName] = useState('');
+  const [Email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
-  const [accountType, setAccountType] = useState('');
+  const [AccountType, setAccountType] = useState('');
 
   const handleClickOpen = () => {
     setOpenDialog(true);
@@ -62,11 +61,22 @@ export default function TransactionList() {
   };
 
   const addItem = () => {
-    setItems([...items, createData(name, email, accountType)]);
-    setName('');
-    setEmail('');
-    setAccountType('');
-    handleClose();
+    const newItem = createData(Name, Email, AccountType);
+
+    const database = getDatabase();
+    const usersRef = ref(database, 'users');
+
+    push(usersRef, newItem)
+      .then((newRef) => {
+        setItems([...items, { ...newItem, key: newRef.key }]);
+        setName('');
+        setEmail('');
+        setAccountType('');
+        handleClose();
+      })
+      .catch((error) => {
+        console.error('Error adding item to Firebase:', error);
+      });
   };
 
   useEffect(() => {
@@ -76,8 +86,8 @@ export default function TransactionList() {
     onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const userData = Object.values(data).map(({ Name, Email, AccountType }) =>
-          createData(Name, Email, AccountType)
+        const userData = Object.entries(data).map(([key, { Name, Email, AccountType }]) =>
+          createData(Name, Email, AccountType, key)
         );
         setItems(userData);
         setLoading(false);
@@ -86,9 +96,19 @@ export default function TransactionList() {
   }, []);
 
   const handleDelete = (index) => {
-    const updatedItems = [...items];
-    updatedItems.splice(index + page * rowsPerPage, 1);
-    setItems(updatedItems);
+    const itemToDelete = items[index + page * rowsPerPage];
+    if (itemToDelete) {
+      const database = getDatabase();
+      const usersRef = ref(database, `users/${itemToDelete.key}`);
+      remove(usersRef)
+        .then(() => {
+          const updatedItems = items.filter((_, idx) => idx !== index + page * rowsPerPage);
+          setItems(updatedItems);
+        })
+        .catch((error) => {
+          console.error('Error deleting item:', error);
+        });
+    }
   };
 
   return (
@@ -144,8 +164,7 @@ export default function TransactionList() {
                           {column.id === 'delete' ? (
                             <>
                               {row[column.id]}
-                              <IconButton onClick={() => handleDelete(index)} aria-label="delete"
-                              style={{ color: 'red' }}>
+                              <IconButton onClick={() => handleDelete(index)} aria-label="delete" style={{ color: 'red' }}>
                                 <DeleteIcon />
                               </IconButton>
                             </>
@@ -186,7 +205,7 @@ export default function TransactionList() {
           <FormControl fullWidth margin="dense" variant="outlined">
             <InputLabel>Account Type</InputLabel>
             <Select
-              value={accountType}
+              value={AccountType}
               onChange={(e) => setAccountType(e.target.value)}
               label="Account Type"
               sx={{
@@ -212,14 +231,14 @@ export default function TransactionList() {
             margin="dense"
             label="Name"
             fullWidth
-            value={name}
+            value={Name}
             onChange={(e) => setName(e.target.value)}
           />
           <TextField
             margin="dense"
             label="Email"
             fullWidth
-            value={email}
+            value={Email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </DialogContent>

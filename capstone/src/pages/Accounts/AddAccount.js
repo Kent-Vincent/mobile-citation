@@ -5,16 +5,42 @@ import Button from '@mui/material/Button';
 const AddItemForm = ({ addItem }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [accountType, setAccountType] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    addItem({ name, email });
+    addItem({ name, email,accountType });
     setName('');
     setEmail('');
+    setAccountType('');
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      <FormControl fullWidth margin="dense" variant="outlined">
+            <InputLabel>Account Type</InputLabel>
+            <Select
+              value={accountType}
+              onChange={(e) => setAccountType(e.target.value)}
+              label="Account Type"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                },
+              }}
+            >
+              <MenuItem value="officer">Officer</MenuItem>
+              <MenuItem value="treasurer">Treasurer</MenuItem>
+            </Select>
+          </FormControl>
       <TextField
         label="Name"
         variant="outlined"
