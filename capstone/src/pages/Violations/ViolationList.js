@@ -111,8 +111,11 @@ export default function ViolationList() {
 
   const handleOpenEditDialog = (row) => {
     setSelectedRow(row);
-    setSelectedViolation(row.violation);
-    setSelectedPrice(row.totalprice);
+    setEditedViolation({
+      violation: row.violation,
+      totalprice: row.totalprice,
+    });
+    setUploadedIcon(row.iconUrl);
     setOpenEditDialog(true);
   };
 
