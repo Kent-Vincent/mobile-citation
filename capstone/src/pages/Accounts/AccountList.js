@@ -5,6 +5,10 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
@@ -15,11 +19,15 @@ import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 import Loading from '../Loading';
 import { ref, onValue, getDatabase } from 'firebase/database';
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
 
 const columns = [
   { id: 'name', label: 'Name', minWidth: 150 },
   { id: 'email', label: 'Email', minWidth: 200 },
   { id: 'accountType', label: 'Account Type', minWidth: 150 },
+  { id: 'delete', minWidth: 150 },
+
 ];
 
 function createData(name, email, accountType) {
@@ -34,6 +42,7 @@ export default function TransactionList() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
+  const [accountType, setAccountType] = useState('');
 
   const handleClickOpen = () => {
     setOpenDialog(true);
@@ -53,9 +62,10 @@ export default function TransactionList() {
   };
 
   const addItem = () => {
-    setItems([...items, createData(name, email)]);
+    setItems([...items, createData(name, email, accountType)]);
     setName('');
     setEmail('');
+    setAccountType('');
     handleClose();
   };
 
@@ -75,6 +85,12 @@ export default function TransactionList() {
     });
   }, []);
 
+  const handleDelete = (index) => {
+    const updatedItems = [...items];
+    updatedItems.splice(index + page * rowsPerPage, 1);
+    setItems(updatedItems);
+  };
+
   return (
     <>
       {loading ? (
@@ -85,9 +101,9 @@ export default function TransactionList() {
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
                 <TableRow>
-                  <TableCell colSpan={3} align="right">
+                  <TableCell colSpan={4} align="right">
                     <Button variant="contained" color="primary" onClick={handleClickOpen}>
-                      Add Item
+                      Add Account
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -120,13 +136,22 @@ export default function TransactionList() {
                           style={{
                             minWidth: column.minWidth,
                             whiteSpace: 'nowrap',
-                            fontWeight: 'bold',
                             maxWidth: '200px',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                           }}
                         >
-                          {row[column.id]}
+                          {column.id === 'delete' ? (
+                            <>
+                              {row[column.id]}
+                              <IconButton onClick={() => handleDelete(index)} aria-label="delete"
+                              style={{ color: 'red' }}>
+                                <DeleteIcon />
+                              </IconButton>
+                            </>
+                          ) : (
+                            row[column.id]
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -158,6 +183,30 @@ export default function TransactionList() {
       >
         <DialogTitle>Add New Account</DialogTitle>
         <DialogContent>
+          <FormControl fullWidth margin="dense" variant="outlined">
+            <InputLabel>Account Type</InputLabel>
+            <Select
+              value={accountType}
+              onChange={(e) => setAccountType(e.target.value)}
+              label="Account Type"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                },
+              }}
+            >
+              <MenuItem value="officer">Officer</MenuItem>
+              <MenuItem value="treasurer">Treasurer</MenuItem>
+            </Select>
+          </FormControl>
           <TextField
             autoFocus
             margin="dense"
@@ -165,22 +214,6 @@ export default function TransactionList() {
             fullWidth
             value={name}
             onChange={(e) => setName(e.target.value)}
-            InputProps={{
-              sx: {
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'red',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'green',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'blue',
-                  },
-                  borderRadius: '30px',
-                },
-              },
-            }}
           />
           <TextField
             margin="dense"
