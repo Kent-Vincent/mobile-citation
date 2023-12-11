@@ -7,6 +7,7 @@ import TextField from '@mui/material/TextField';
 import ChangeCircleRoundedIcon from '@mui/icons-material/ChangeCircleRounded';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getDatabase, ref as dbRef, update } from 'firebase/database';
+import toast, { Toaster } from 'react-hot-toast';
 import CircularProgress from '@mui/material/CircularProgress';
 
 const EditViolation = ({
@@ -81,7 +82,18 @@ const EditViolation = ({
           const violationReference = dbRef(db, `violations/${locationId}`);
           await update(violationReference, updatedRow);
 
-          console.log('Data updated successfully!');
+          toast.success('Successfully Edited!', {
+            style: {
+              border: '1px solid #00425A',
+              background: '#E6D81C',
+              padding: '16px',
+              color: '#00425A',
+            },
+            iconTheme: {
+              primary: '#00425A',
+              secondary: '#FFFAEE',
+            },
+          }); 
         }
 
         if (Array.isArray(dataRows)) {
@@ -100,7 +112,7 @@ const EditViolation = ({
 
       onClose();
     } catch (error) {
-      console.error('Error saving changes:', error);
+      toast.error('Error saving changes:', error);
     } 
   };
 
