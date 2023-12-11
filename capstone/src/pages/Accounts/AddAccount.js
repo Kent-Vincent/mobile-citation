@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import toast, { Toaster } from 'react-hot-toast';
+
 
 const AddItemForm = ({ addItem }) => {
   const [name, setName] = useState('');
@@ -37,8 +39,8 @@ const AddItemForm = ({ addItem }) => {
                 },
               }}
             >
-              <MenuItem value="officer">Officer</MenuItem>
-              <MenuItem value="treasurer">Treasurer</MenuItem>
+              <MenuItem value="Officer">Officer</MenuItem>
+              <MenuItem value="Treasurer">Treasurer</MenuItem>
             </Select>
           </FormControl>
       <TextField
