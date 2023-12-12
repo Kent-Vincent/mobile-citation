@@ -22,6 +22,10 @@ import { getDatabase, ref, push, set, onValue, remove } from 'firebase/database'
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import toast, { Toaster } from 'react-hot-toast';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+
+
+
 
 const columns = [
   { id: 'Name', label: 'Name', minWidth: 150 },
@@ -34,7 +38,7 @@ function createData(Name, Email, AccountType, key) {
   return { Name, Email, AccountType, key };
 }
 
-export default function TransactionList() {
+export default function AccountList() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [items, setItems] = useState([]);
@@ -87,7 +91,7 @@ export default function TransactionList() {
         setAccountType('');
         handleClose();
 
-        toast.success('Account deleted successfully!', {
+        toast.success('Account added successfully!', {
           style: {
             border: '1px solid #00425A',
             background: '#E6D81C',
@@ -294,4 +298,4 @@ export default function TransactionList() {
       </Dialog>
     </>
   );
-}
+} 
