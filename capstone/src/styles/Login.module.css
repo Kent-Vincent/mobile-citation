@@ -89,6 +89,13 @@
     border: none;
 }
 
+.logo {
+    margin-top: 30px;
+    width: 100px; /* Adjust the width as needed */
+    height: auto; /* Maintain aspect ratio */
+
+  }
+
 .submit:after{
     content: " ";
     width: 0%;

@@ -62,12 +62,15 @@ const Login = () => {
   }
 };
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.text}>LOG IN</div>
-        <div className={styles.underline}></div>
-      </div>
+return (
+  <div className={styles.container}>
+    <div className={styles.header}>
+      {/* Add an image for the logo */}
+      <img src="lgo.png" alt="Logo" className={styles.logo} />
+
+      <div className={styles.text}>LOG IN</div>
+      <div className={styles.underline}></div>
+    </div>
 
       <div className={styles.inputs}>
         <div className={styles.input}>
