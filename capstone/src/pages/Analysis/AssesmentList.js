@@ -1,156 +1,167 @@
-  import * as React from 'react';
-  import { TableCell, TableRow, Box, Collapse, IconButton, Typography } from '@mui/material';
-  import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-  import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-  import TableContainer from '@mui/material/TableContainer';
-  import TableBody from '@mui/material/TableBody';
-  import TableHead from '@mui/material/TableHead';
-  import Paper from '@mui/material/Paper';
-  import Table from '@mui/material/Table';
-  import PropTypes from 'prop-types';
+import React, { useState, useEffect } from 'react';
+import {
+  TableCell,
+  TableRow,
+  TableContainer,
+  TableHead,
+  TableBody,
+  Table,
+  Typography,
+  Paper,
+  Collapse,
+  IconButton,
+} from '@mui/material';
+import { ref, onValue, getDatabase } from 'firebase/database';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
-  function createData(name, timeanddate, location, licensenumber, platenumber, violation) {
-      return {
-        name,
-        timeanddate,
-        licensenumber,
-        location,
-        platenumber,
-        violation,
-      };
-    }
-    
-    function CollapsibleRow({ rows }) {
-      const [open, setOpen] = React.useState({});
-    
-      const groupedRows = rows.reduce((acc, row) => {
-        const existingRow = acc.find((item) => item.name === row.name);
-        if (existingRow) {
-          const existingViolation = existingRow.violations.find(
-            (violation) => violation.violation === row.violation
-          );
-          if (existingViolation) {
-            existingViolation.count += 1;
-            existingViolation.timeanddate.push(row.timeanddate);
-            existingViolation.location.push(row.location);
-          } else {
-            existingRow.violations.push({
-              ...row,
-              count: 1,
-              timeanddate: [row.timeanddate],
-              location: [row.location],
+const ViolationsTable = ({ violations, isExpanded }) => {
+  return (
+    <Collapse in={isExpanded && violations.length > 0}>
+      <Table size="small" aria-label="purchases">
+        <TableHead>
+          <TableRow>
+            <TableCell>Violations</TableCell>
+            <TableCell>Date and Time</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {violations.map((violation, index) => (
+            <TableRow key={index}>
+              <TableCell>
+                {violation.Violation.split('\n').map((line, index) => (
+                  <React.Fragment key={index}>
+                    {line}
+                    <br />
+                  </React.Fragment>
+                ))}
+              </TableCell>
+              <TableCell>{violation.DateAndTime}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Collapse>
+  );
+};
+
+const AssessmentList = () => {
+  const [rows, setRows] = useState([]);
+  const [repetitionCount, setRepetitionCount] = useState({});
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  useEffect(() => {
+    const database = getDatabase();
+
+    const fetchData = async () => {
+      const dataRef = ref(database, 'uploads/Information');
+      
+      try {
+        onValue(dataRef, (snapshot) => {
+          const data = snapshot.val();
+      
+          if (data) {
+            const uniqueRows = new Set();
+            const countMap = {};
+      
+            Object.values(data).forEach((innerData) => {
+              Object.values(innerData).forEach((row) => {
+                const uniqueKey = `${row.Name}-${row.LicenseNumber}-${row.PlateNumber}`;
+                uniqueRows.add(uniqueKey);
+      
+                // Count repetitions
+                countMap[uniqueKey] = (countMap[uniqueKey] || 0) + 1;
+      
+                row.Violation = row.Violation.replace(/\\\\n/g, '\n');
+              });
             });
+      
+            const newData = Array.from(uniqueRows).map((uniqueKey) => {
+              const [Name, LicenseNumber, PlateNumber] = uniqueKey.split('-');
+              return {
+                Name,
+                LicenseNumber,
+                PlateNumber,
+                Violations: Object.values(data).flatMap((innerData) =>
+                  Object.values(innerData).filter(
+                    (innerRow) =>
+                      innerRow.Name === Name &&
+                      innerRow.LicenseNumber === LicenseNumber &&
+                      innerRow.PlateNumber === PlateNumber
+                  )
+                ),
+              };
+            });
+      
+            console.log('Fetched Data: ', newData);
+            setRows(newData);
+            setRepetitionCount(countMap);
+            setSelectedRow(null);
           }
-        } else {
-          acc.push({ name: row.name, licensenumber: row.licensenumber, platenumber: row.platenumber, violations: [{ ...row, count: 1, timeanddate: [row.timeanddate], location: [row.location] }] });
-        }
-        return acc;
-      }, []);
-    
-      const toggleRow = (name) => {
-        setOpen((prevState) => ({
-          ...prevState,
-          [name]: prevState[name] ? !prevState[name] : true,
-        }));
-      };
-    
-      return (
-        <>
-          {groupedRows.map((groupedRow, index) => (
+        });
+      } catch (error) {
+        console.error('Error setting up data listener:', error);
+      }
+    };    
+
+    fetchData();
+
+    return () => {
+      // Cleanup logic if needed
+    };
+  }, []);
+
+  const handleRowToggle = (uniqueKey) => {
+    setSelectedRow(selectedRow === uniqueKey ? null : uniqueKey);
+  };
+
+  return (
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell />
+            <TableCell>Name</TableCell>
+            <TableCell>License Number</TableCell>
+            <TableCell>Plate Number</TableCell>
+            <TableCell>Repetition Count</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.map((row, index) => (
             <React.Fragment key={index}>
-              <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+              <TableRow>
                 <TableCell>
                   <IconButton
-                    aria-label="expand row"
                     size="small"
-                    onClick={() => toggleRow(groupedRow.name)}
+                    onClick={() => handleRowToggle(`${row.Name}-${row.LicenseNumber}-${row.PlateNumber}`)}
                   >
-                    {open[groupedRow.name] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    {selectedRow === `${row.Name}-${row.LicenseNumber}-${row.PlateNumber}` ? (
+                      <KeyboardArrowUpIcon />
+                    ) : (
+                      <KeyboardArrowDownIcon />
+                    )}
                   </IconButton>
                 </TableCell>
-                <TableCell component="th" scope="row">
-                  {groupedRow.name}
-                </TableCell>
-                <TableCell style={{ width: '30%', paddingLeft: '4px' }}>{groupedRow.licensenumber}</TableCell>
-                <TableCell style={{ width: '30%', paddingLeft: '4px' }}>{groupedRow.platenumber}</TableCell>
+                <TableCell>{row.Name}</TableCell>
+                <TableCell>{row.LicenseNumber}</TableCell>
+                <TableCell>{row.PlateNumber}</TableCell>
+                <TableCell>{repetitionCount[`${row.Name}-${row.LicenseNumber}-${row.PlateNumber}`]}</TableCell>
               </TableRow>
-              {open[groupedRow.name] && (
-                <TableRow>
-                  <TableCell style={{ paddingRight: '2px', paddingLeft:'1',paddingBottom: 20, paddingTop: 2 }} colSpan={7}>
-                    <Collapse in={open[groupedRow.name]} timeout="auto" unmountOnExit>
-                      <Box sx={{ margin: 1 }}>
-                      <Typography variant="h6" gutterBottom component="div" fontWeight="bold">
-                        Violation History
-                      </Typography>
-                        <Table size="small" aria-label="purchases">
-                          <TableHead>
-                            <TableRow>
-                            <TableCell style={{ width: '25%' }}>Time and Date</TableCell>
-  <TableCell style={{ width: '30%' }}>Violation</TableCell>
-  <TableCell style={{ width: '30%' }}>Location</TableCell>
-  <TableCell align="center" style={{ width: '40%' }}>Repetition</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {groupedRow.violations.map((violation, idx) => (
-                              <TableRow key={idx}>
-                                <TableCell component="th" scope="row">
-                                  {violation.timeanddate.join(', ')}
-                                </TableCell>
-                                <TableCell>{violation.violation}</TableCell>
-                                <TableCell>{violation.location.join(', ')}</TableCell>
-                                <TableCell align="center">{violation.count}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </Box>
-                    </Collapse>
-                  </TableCell>
-                </TableRow>
-              )}
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <ViolationsTable
+                    violations={row.Violations}
+                    isExpanded={selectedRow === `${row.Name}-${row.LicenseNumber}-${row.PlateNumber}`}
+                  />
+                </TableCell>
+              </TableRow>
             </React.Fragment>
           ))}
-        </>
-      );
-    }
-    
-    CollapsibleRow.propTypes = {
-      rows: PropTypes.array.isRequired,
-    };
-    
-    export default function CollapsibleTable() {
-      const rows = [
-        createData('Kent Sarsalejo', '2022-12-05', '500 Don Julian Rodriguez Sr. Ave, Talomo, Davao City, Davao del Sur, Philippines', 'L02-91-072167', 'LTO-3456', 'Speeding'),
-        createData('Kent Sarsalejo', '2022-12-06', '500 Don Julian Rodriguez Sr. Ave, Talomo, Davao City, Davao del Sur, Philippines', 'L02-91-072167', 'LTO-3456', 'Speeding'),
-        createData('Kent Sarsalejo', '2022-12-06', '500 Don Julian Rodriguez Sr. Ave, Talomo, Davao City, Davao del Sur, Philippines', 'L02-91-072167', 'LTO-3456', 'Employing Insolent, Discourteous, or Arrogant Driver'),
-        createData('Jas Villanueva', '2022-12-25', '500 Don Julian Rodriguez Sr. Ave, Talomo, Davao City, Davao del Sur, Philippines', 'A12-34-567890', 'ABC-1234', 'Speeding'),
-        createData('Jas Villanueva', '2022-12-30', '500 Don Julian Rodriguez Sr. Ave, Talomo, Davao City, Davao del Sur, Philippines', 'A12-34-567890', 'ABC-1234', 'Speeding'),
-        createData('Jas Villanueva', '2022-12-25', '500 Don Julian Rodriguez Sr. Ave, Talomo, Davao City, Davao del Sur, Philippines', 'A12-34-567890', 'ABC-1234', 'Careless Driving'),
-      ];
-    
-      return (
-        <TableContainer component={Paper} sx={{ width: '100%' , justifyContent: 'center' }}>
-          <Table aria-label="collapsible table">
-          <TableHead>
-  <TableRow>
-    <TableCell style={{ width: '5%' }} />
-    <TableCell style={{ width: '30%', paddingLeft: '4px' }}>
-      <Typography variant="body1" fontWeight="bold">Name of Violator</Typography>
-    </TableCell>
-    <TableCell align="left" style={{ width: '30%', paddingLeft: '4px' }}>
-      <Typography variant="body1" fontWeight="bold">License Number</Typography>
-    </TableCell>
-    <TableCell align="left" style={{ width: '30%', paddingLeft: '4px' }}>
-      <Typography variant="body1" fontWeight="bold">Plate Number</Typography>
-    </TableCell>
-  </TableRow>
-</TableHead>
-            <TableBody>
-              <CollapsibleRow rows={rows} />
-            </TableBody>
-          </Table>
-        </TableContainer>
-      );
-    }
-    
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+
+export default AssessmentList;
