@@ -135,7 +135,7 @@ export default function TransactionList() {
                                     backgroundColor: statusColor,
                                     color: 'white',
                                     border: 'none',
-                                    borderRadius: '10px',
+                                    borderRadius: '5px',
                                   }}
                                 >
                                   {row[column.id]}
