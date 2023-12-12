@@ -114,7 +114,7 @@ export default function TransactionList() {
                 {rows
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, index) => {
-                    const violationText = row['Violation'].replace(/\\\\n/g, '<br />');
+                    const violationText = row && row['Violation'] ? row['Violation'].replace(/\\\\n/g, '<br />') : '';
 
 
                     return (
@@ -123,8 +123,8 @@ export default function TransactionList() {
                           if (column.id === 'Violation') {
                             return (
                               <TableCell key={column.id} align={column.align}>
-  <div dangerouslySetInnerHTML={{ __html: violationText }} />
-</TableCell>
+                                <div dangerouslySetInnerHTML={{ __html: violationText }} />
+                              </TableCell>
                             );
                           } else if (column.id === 'Status') {
                             const statusColor = row[column.id] === 'Paid' ? 'green' : 'red';
