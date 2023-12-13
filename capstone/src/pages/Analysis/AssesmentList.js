@@ -148,14 +148,16 @@ const AssessmentList = () => {
                 <TableCell>{row.PlateNumber}</TableCell>
                 <TableCell>{repetitionCount[`${row.Name}-${row.LicenseNumber}-${row.PlateNumber}`]}</TableCell>
               </TableRow>
-              <TableRow>
-                <TableCell colSpan={5}>
-                  <ViolationsTable
-                    violations={row.Violations}
-                    isExpanded={selectedRow === `${row.Name}-${row.LicenseNumber}-${row.PlateNumber}`}
-                  />
-                </TableCell>
-              </TableRow>
+              {selectedRow === `${row.Name}-${row.LicenseNumber}-${row.PlateNumber}` && (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <ViolationsTable
+                      violations={row.Violations}
+                      isExpanded={selectedRow === `${row.Name}-${row.LicenseNumber}-${row.PlateNumber}`}
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
             </React.Fragment>
           ))}
         </TableBody>
