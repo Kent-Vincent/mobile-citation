@@ -27,6 +27,7 @@ export default function TransactionList() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortByStatus, setSortByStatus] = useState(null);
 
   useEffect(() => {
     const database = getDatabase();
@@ -39,9 +40,7 @@ export default function TransactionList() {
           const data = snapshot.val();
 
           if (data) {
-            const newData = Object.values(data).flatMap((innerData) =>
-              Object.values(innerData)
-            );
+            const newData = Object.values(data).flatMap((innerData) => Object.values(innerData));
             console.log('Fetched Data: ', newData);
             setRows(newData);
             setLoading(false);
@@ -67,6 +66,15 @@ export default function TransactionList() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
+  };
+
+  const handleStatusClick = () => {
+    // Toggle sorting by status (Paid, Unpaid, or null for all)
+    setSortByStatus((prevSort) => {
+      if (prevSort === 'Paid') return 'Pending';
+      if (prevSort === 'Pending') return null;
+      return 'Paid';
+    });
   };
 
   return (
@@ -105,20 +113,35 @@ export default function TransactionList() {
                       align={column.align}
                       style={{ minWidth: column.minWidth, fontWeight: 'bold' }}
                     >
-                      {column.label}
+                      {column.id === 'Status' ? (
+                        <button
+                          style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+                          onClick={handleStatusClick}
+                        >
+                          {column.label}
+                        </button>
+                      ) : (
+                        column.label
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {rows
+                  .filter((row) => (sortByStatus ? row['Status'] === sortByStatus : true))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, index) => {
                     const violationText = row && row['Violation'] ? row['Violation'].replace(/\\\\n/g, '<br />') : '';
 
-
                     return (
-                      <TableRow hover role="checkbox" tabIndex={-1} key={index}>
+                      <TableRow
+                        hover
+                        role="checkbox"
+                        tabIndex={-1}
+                        key={index}
+                        style={{ backgroundColor: row['Status'] === 'Paid' ? '#C8E6C9' : '#FFEBEE' }}
+                      >
                         {columns.map((column) => {
                           if (column.id === 'Violation') {
                             return (
@@ -146,9 +169,7 @@ export default function TransactionList() {
                             const value = row[column.id];
                             return (
                               <TableCell key={column.id} align={column.align}>
-                                {column.format && typeof value === 'number'
-                                  ? column.format(value)
-                                  : value}
+                                {column.format && typeof value === 'number' ? column.format(value) : value}
                               </TableCell>
                             );
                           }
