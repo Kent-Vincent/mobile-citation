@@ -211,7 +211,7 @@ useEffect(() => {
       {loading ? (
         <Loading />
       ) : (
-        <Paper sx={{ width: '80%', overflow: 'hidden', marginLeft: '150px' }}>
+        <Paper sx={{ width: '100%', overflow: 'hidden'}}>
           <TableContainer sx={{ maxHeight: 'calc(50vh - 50px)' }}>
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
