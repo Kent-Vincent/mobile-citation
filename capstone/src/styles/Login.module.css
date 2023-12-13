@@ -2,11 +2,18 @@
     display:flex;
     flex-direction: column;
     margin: auto;
-    margin-top: 200px;
+    margin-top: 100px;
     width: 600px;
     background: #00425A;
     padding-bottom: 10px;
     border-radius: 30px;
+
+    @media (max-width: 768px) {
+        width: 80%;
+        margin-top: 50px;
+        margin-left: auto;
+        margin-right: auto;
+    }
 }
 .logo {
     margin-right: 10px;
@@ -17,11 +24,19 @@
     align-items: center;
     gap: 9px;
     width: 100%;
+
+    @media (max-width: 768px) {
+        align-items: center;
+    }
 }
 .text{
     color:#fff;
     font-size: 48px;
     font-weight: 700;
+
+    @media (max-width: 768px) {
+        font-size: 36px;
+    }
 }
 .underline{
     width: 61px;
@@ -34,6 +49,11 @@
     display: flex;
     flex-direction: column;
     gap:25px;
+
+    @media (max-width: 768px) {
+        align-items: center;
+        margin-top: 30px;
+    }
 
 }
 .input{
@@ -51,7 +71,7 @@
 
 .input input{
     height: 50px;
-    width: 400px;
+    width: 100%;
     background: transparent;
     border: none;
     outline: none;
@@ -74,6 +94,11 @@
     display: flex;
     gap: 30px;
     margin: 60px auto;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: center;
+    }
 }
 
 .submit{
